@@ -1,5 +1,5 @@
 import React from 'react';
-import { DigiCodeDevice } from '../../shared/types';
+import { DigiCodeDevice } from '../types';
 
 interface DeviceCardProps {
   device: DigiCodeDevice;
