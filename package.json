@@ -9,7 +9,12 @@
     "preview": "vite preview",
     "tauri": "tauri"
   },
-  "keywords": ["digicode", "mdns", "tauri", "esp32"],
+  "keywords": [
+    "digicode",
+    "mdns",
+    "tauri",
+    "esp32"
+  ],
   "author": "Fab Lab West Harima",
   "license": "MIT",
   "devDependencies": {
@@ -26,6 +31,7 @@
   },
   "dependencies": {
     "@tauri-apps/api": "^2",
+    "@tauri-apps/plugin-updater": "^2.9.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   }

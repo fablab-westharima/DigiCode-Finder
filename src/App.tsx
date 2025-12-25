@@ -1,12 +1,26 @@
 import { useDevices } from './hooks/useDevices';
+import { useUpdater } from './hooks/useUpdater';
 import DeviceCard from './components/DeviceCard';
 import Header from './components/Header';
 
 function App() {
   const { devices, isSearching, refresh } = useDevices();
+  const { updateAvailable, newVersion, isDownloading, downloadAndInstall } = useUpdater();
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {updateAvailable && (
+        <div className="bg-blue-600 text-white px-4 py-2 flex items-center justify-between text-sm">
+          <span>新しいバージョン {newVersion} が利用可能です</span>
+          <button
+            onClick={downloadAndInstall}
+            disabled={isDownloading}
+            className="bg-white text-blue-600 px-3 py-1 rounded font-medium hover:bg-blue-50 disabled:opacity-50"
+          >
+            {isDownloading ? '更新中...' : '今すぐ更新'}
+          </button>
+        </div>
+      )}
       <Header isSearching={isSearching} onRefresh={refresh} />
 
       <main className="p-4">
