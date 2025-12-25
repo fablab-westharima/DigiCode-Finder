@@ -1,4 +1,3 @@
-import React from 'react';
 import { DigiCodeDevice } from '../types';
 
 interface DeviceCardProps {

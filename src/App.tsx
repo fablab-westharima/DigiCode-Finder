@@ -1,4 +1,3 @@
-import React from 'react';
 import { useDevices } from './hooks/useDevices';
 import DeviceCard from './components/DeviceCard';
 import Header from './components/Header';
