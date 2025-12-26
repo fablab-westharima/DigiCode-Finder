@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+import { getVersion } from '@tauri-apps/api/app';
 import { useDevices } from './hooks/useDevices';
 import { useUpdater } from './hooks/useUpdater';
 import DeviceCard from './components/DeviceCard';
@@ -6,6 +8,11 @@ import Header from './components/Header';
 function App() {
   const { devices, isSearching, refresh } = useDevices();
   const { updateAvailable, newVersion, isDownloading, downloadAndInstall } = useUpdater();
+  const [appVersion, setAppVersion] = useState('');
+
+  useEffect(() => {
+    getVersion().then(setAppVersion).catch(() => setAppVersion('unknown'));
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -73,7 +80,7 @@ function App() {
               </span>
             )}
           </span>
-          <span>DigiCode Helper v1.0.0</span>
+          <span>DigiCode Helper v{appVersion}</span>
         </div>
       </footer>
     </div>
