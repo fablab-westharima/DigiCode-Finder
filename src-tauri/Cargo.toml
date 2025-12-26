@@ -1,6 +1,6 @@
 [package]
 name = "digicode-helper"
-version = "1.1.2"
+version = "1.1.3"
 description = "DigiCode Helper - mDNS device discovery"
 authors = ["Fab Lab West Harima"]
 license = "MIT"
@@ -29,8 +29,10 @@ serde_json = "1.0"
 # Async runtime
 tokio = { version = "1", features = ["full"] }
 
-# mDNS (ネイティブAPI使用 - entitlement不要)
-astro-dnssd = "0.3"
+# mDNS: dns-sd コマンド呼び出し方式（ライブラリ不要）
+# macOS: dns-sd (標準搭載)
+# Windows: dns-sd.exe (Bonjour Print Services必要)
+# Linux: avahi-browse
 
 # HTTP server
 axum = "0.7"
@@ -42,6 +44,3 @@ log = "0.4"
 
 # Date/Time
 chrono = { version = "0.4", features = ["serde"] }
-
-# DNS resolution
-dns-lookup = "2"

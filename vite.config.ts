@@ -8,7 +8,7 @@ export default defineConfig({
 
   // Tauri expects a fixed port, fail if that port is not available
   server: {
-    port: 5173,
+    port: 5174,  // DigiCode本体(5173)と競合しないように変更
     strictPort: true,
   },
 
