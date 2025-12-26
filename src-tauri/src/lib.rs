@@ -16,6 +16,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_log::Builder::default().build())
         .plugin(tauri_plugin_updater::Builder::default().build())
+        .plugin(tauri_plugin_deep_link::init())
         .manage(state)
         .invoke_handler(tauri::generate_handler![
             commands::get_devices,

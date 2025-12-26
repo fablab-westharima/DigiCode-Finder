@@ -1,6 +1,6 @@
 [package]
 name = "digicode-helper"
-version = "1.0.0"
+version = "1.1.0"
 description = "DigiCode Helper - mDNS device discovery"
 authors = ["Fab Lab West Harima"]
 license = "MIT"
@@ -20,6 +20,7 @@ tauri-build = { version = "2.5.3", features = [] }
 tauri = { version = "2.9.5", features = [] }
 tauri-plugin-log = "2"
 tauri-plugin-updater = "2"
+tauri-plugin-deep-link = "2"
 
 # Serialization
 serde = { version = "1.0", features = ["derive"] }
@@ -28,8 +29,8 @@ serde_json = "1.0"
 # Async runtime
 tokio = { version = "1", features = ["full"] }
 
-# mDNS
-mdns-sd = "0.11"
+# mDNS (ネイティブAPI使用 - entitlement不要)
+astro-dnssd = "0.3"
 
 # HTTP server
 axum = "0.7"
@@ -40,3 +41,6 @@ log = "0.4"
 
 # Date/Time
 chrono = { version = "0.4", features = ["serde"] }
+
+# DNS resolution
+dns-lookup = "2"

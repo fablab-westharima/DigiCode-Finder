@@ -1,15 +1,16 @@
 use crate::types::DigiCodeDevice;
+use astro_dnssd::{ServiceBrowserBuilder, ServiceEventType};
 use chrono::Utc;
-use log::{error, info};
-use mdns_sd::{ServiceDaemon, ServiceEvent};
+use dns_lookup::lookup_host;
+use log::{error, info, warn};
 use std::collections::HashMap;
 use std::sync::Arc;
-use std::time::Instant;
+use std::time::{Duration, Instant};
 use tauri::{AppHandle, Emitter};
 use tokio::sync::RwLock;
 
 /// mDNS サービスタイプ
-const SERVICE_TYPE: &str = "_digicode._tcp.local.";
+const SERVICE_TYPE: &str = "_digicode._tcp";
 
 /// デバイス管理用の共有状態
 pub struct MdnsState {
@@ -35,88 +36,96 @@ impl Default for MdnsState {
 }
 
 /// mDNS 検索を開始（ブロッキング）
+/// astro-dnssd はネイティブAPIを使用するため、entitlement不要
 pub async fn start_mdns_search(app_handle: AppHandle, state: Arc<MdnsState>) {
-    let mdns = match ServiceDaemon::new() {
-        Ok(daemon) => daemon,
-        Err(e) => {
-            error!("Failed to create mDNS daemon: {}", e);
-            return;
-        }
-    };
-
-    let receiver = match mdns.browse(SERVICE_TYPE) {
-        Ok(recv) => recv,
-        Err(e) => {
-            error!("Failed to browse mDNS services: {}", e);
-            return;
-        }
-    };
+    info!("Starting mDNS search for {} using native API (astro-dnssd)", SERVICE_TYPE);
 
     *state.is_searching.write().await = true;
-    info!("Started mDNS search for {}", SERVICE_TYPE);
 
+    // ブラウザを作成
+    let browser = match ServiceBrowserBuilder::new(SERVICE_TYPE)
+        .with_domain("local")
+        .browse()
+    {
+        Ok(browser) => browser,
+        Err(e) => {
+            error!("Failed to create mDNS browser: {:?}", e);
+            *state.is_searching.write().await = false;
+            return;
+        }
+    };
+
+    info!("mDNS browser started successfully");
+
+    // ポーリングでサービスを受信
     loop {
-        match receiver.recv() {
-            Ok(event) => {
-                handle_mdns_event(event, &app_handle, &state).await;
+        match browser.recv_timeout(Duration::from_millis(500)) {
+            Ok(service) => {
+                // Added イベントのみ処理
+                if !matches!(service.event_type, ServiceEventType::Added) {
+                    // Removed の場合はスキップまたは削除処理
+                    if matches!(service.event_type, ServiceEventType::Removed) {
+                        let name = format!("{}._digicode._tcp.local.", service.name);
+                        info!("Device removed: {}", name);
+                        state.devices.write().await.remove(&name);
+                        if let Err(e) = app_handle.emit("device-removed", &name) {
+                            error!("Failed to emit device-removed event: {}", e);
+                        }
+                    }
+                    continue;
+                }
+
+                // サービス発見時の処理
+                let name = format!("{}._digicode._tcp.local.", service.name);
+
+                // TXT レコードを取得（astro-dnssd は HashMap<String, String> で提供）
+                let txt = service.txt_record.clone().unwrap_or_default();
+
+                // ホスト名からIPアドレスを解決する
+                let hostname = &service.hostname;
+                let addresses: Vec<String> = match lookup_host(hostname) {
+                    Ok(ips) => ips
+                        .into_iter()
+                        .filter(|ip| ip.is_ipv4()) // IPv4のみ使用
+                        .map(|ip| ip.to_string())
+                        .collect(),
+                    Err(e) => {
+                        warn!("Failed to resolve hostname {}: {:?}", hostname, e);
+                        vec![]
+                    }
+                };
+
+                let device = DigiCodeDevice {
+                    name: name.clone(),
+                    host: service.hostname.clone(),
+                    addresses,
+                    port: service.port,
+                    txt,
+                    last_seen: Utc::now(),
+                };
+
+                info!("Device found: {} at {}", device.name, device.host);
+
+                // デバイス一覧に追加
+                state.devices.write().await.insert(name.clone(), device.clone());
+
+                // フロントエンドに通知
+                if let Err(e) = app_handle.emit("device-found", &device) {
+                    error!("Failed to emit device-found event: {}", e);
+                }
             }
             Err(e) => {
-                error!("mDNS receiver error: {}", e);
-                break;
+                // タイムアウトは正常（サービスが見つからなかっただけ）
+                // エラーログは出さない
+                let err_str = format!("{:?}", e);
+                if !err_str.contains("Timeout") && !err_str.contains("timeout") {
+                    warn!("mDNS browse error: {:?}", e);
+                }
             }
         }
-    }
 
-    *state.is_searching.write().await = false;
-}
-
-/// mDNS イベントを処理
-async fn handle_mdns_event(event: ServiceEvent, app_handle: &AppHandle, state: &Arc<MdnsState>) {
-    match event {
-        ServiceEvent::ServiceResolved(info) => {
-            let name = info.get_fullname().to_string();
-
-            // TXT レコードを変換
-            let mut txt = HashMap::new();
-            for prop in info.get_properties().iter() {
-                let val = prop.val_str();
-                txt.insert(prop.key().to_string(), val.to_string());
-            }
-
-            // IP アドレスを取得
-            let addresses: Vec<String> = info.get_addresses().iter().map(|a| a.to_string()).collect();
-
-            let device = DigiCodeDevice {
-                name: name.clone(),
-                host: info.get_hostname().to_string(),
-                addresses,
-                port: info.get_port(),
-                txt,
-                last_seen: Utc::now(),
-            };
-
-            info!("Device found: {} at {}", device.name, device.host);
-
-            // デバイス一覧に追加
-            state.devices.write().await.insert(name.clone(), device.clone());
-
-            // フロントエンドに通知
-            if let Err(e) = app_handle.emit("device-found", &device) {
-                error!("Failed to emit device-found event: {}", e);
-            }
-        }
-        ServiceEvent::ServiceRemoved(_, fullname) => {
-            info!("Device removed: {}", fullname);
-
-            // デバイス一覧から削除
-            state.devices.write().await.remove(&fullname);
-
-            // フロントエンドに通知
-            if let Err(e) = app_handle.emit("device-removed", &fullname) {
-                error!("Failed to emit device-removed event: {}", e);
-            }
-        }
-        _ => {}
+        // 短いスリープを入れてCPU負荷を下げる
+        tokio::time::sleep(Duration::from_millis(100)).await;
     }
 }
 

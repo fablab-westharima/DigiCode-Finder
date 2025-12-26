@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "DigiCode Helper",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "identifier": "jp.digital-fab.digicode-helper",
   "plugins": {
     "updater": {
@@ -9,6 +9,12 @@
         "https://github.com/fablab-westharima/DigiCode-Helper/releases/latest/download/latest.json"
       ],
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDlBQjJGMjhFMDcwQjU0NUIKUldSYlZBc0hqdkt5bXN5bGt3UTZ3dGxRTUVJbFdnTXZwNktqSjl6dmlDSE81K2hISzl1RmxUMFoK"
+    },
+    "deep-link": {
+      "mobile": [],
+      "desktop": {
+        "schemes": ["digicode-helper"]
+      }
     }
   },
   "build": {
