@@ -2,14 +2,16 @@ use crate::mdns_service::{self, MdnsState};
 use crate::types::{DevicesResponse, HealthResponse, SearchRequest, SearchResponse, StatusResponse};
 use axum::{
     extract::State,
-    http::{HeaderValue, Method},
+    http::{header, HeaderValue, Method},
     routing::{get, post},
     Json, Router,
 };
 use chrono::Utc;
 use log::{error, info};
 use std::sync::Arc;
+use tower::ServiceBuilder;
 use tower_http::cors::CorsLayer;
+use tower_http::set_header::SetResponseHeaderLayer;
 
 /// アプリケーションバージョン
 const VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -40,13 +42,20 @@ pub async fn start_api_server(state: Arc<MdnsState>) {
         .allow_methods([Method::GET, Method::POST, Method::OPTIONS])
         .allow_headers(tower_http::cors::Any);
 
+    // Private Network Access 対応 (Chrome 138+)
+    // プリフライトリクエストで Access-Control-Allow-Private-Network: true を返す
+    let private_network_header = SetResponseHeaderLayer::overriding(
+        header::HeaderName::from_static("access-control-allow-private-network"),
+        HeaderValue::from_static("true"),
+    );
+
     // ルーター設定
     let app = Router::new()
         .route("/api/devices", get(get_devices))
         .route("/api/search", post(start_search))
         .route("/api/status", get(get_status))
         .route("/health", get(health_check))
-        .layer(cors)
+        .layer(ServiceBuilder::new().layer(private_network_header).layer(cors))
         .with_state(state);
 
     // サーバー起動
