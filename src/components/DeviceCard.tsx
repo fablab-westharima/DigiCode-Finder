@@ -32,14 +32,16 @@ function DeviceCard({ device }: DeviceCardProps) {
   const displayName = device.txt?.name || device.name;
   const version = device.txt?.version || '-';
   const primaryAddress = device.addresses[0] || device.host;
+  const uuid = device.txt?.uuid || '-';
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 px-3 py-2 hover:shadow-sm transition-shadow">
-      <div className="flex items-center gap-3">
+    <div className="bg-white rounded-lg border border-gray-200 p-3 hover:shadow-md hover:border-purple-300 transition-all">
+      {/* 上段: デバイス名・ステータス・選択ボタン */}
+      <div className="flex items-center gap-3 mb-2">
         {/* デバイスアイコン */}
-        <div className="w-8 h-8 bg-gradient-to-br from-green-400 to-emerald-500 rounded-md flex items-center justify-center flex-shrink-0">
+        <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-emerald-500 rounded-lg flex items-center justify-center flex-shrink-0">
           <svg
-            className="w-4 h-4 text-white"
+            className="w-5 h-5 text-white"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -53,43 +55,62 @@ function DeviceCard({ device }: DeviceCardProps) {
           </svg>
         </div>
 
-        {/* デバイス情報 */}
+        {/* デバイス名・ステータス */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <h3 className="font-semibold text-gray-800 truncate">{displayName}</h3>
-            <span className="text-xs text-gray-400">v{version}</span>
-            <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse-dot flex-shrink-0" />
+            <h3 className="font-bold text-gray-800 truncate">{displayName}</h3>
+            <span className="flex items-center gap-1 text-xs text-green-600 flex-shrink-0">
+              <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse-dot" />
+              オンライン
+            </span>
           </div>
-          <p className="text-xs text-gray-500 font-mono truncate">
-            {primaryAddress}:{device.port}
-          </p>
         </div>
 
-        {/* コピーボタン */}
+        {/* 選択ボタン */}
         <button
           onClick={handleCopyDeviceInfo}
-          className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all flex-shrink-0 ${
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex-shrink-0 ${
             copied
               ? 'bg-green-500 text-white'
               : 'bg-purple-600 hover:bg-purple-700 text-white'
           }`}
         >
           {copied ? (
-            <span className="flex items-center gap-1">
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <span className="flex items-center gap-1.5">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
-              コピー済
+              選択済み
             </span>
           ) : (
-            <span className="flex items-center gap-1">
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+            <span className="flex items-center gap-1.5">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
-              コピー
+              選択
             </span>
           )}
         </button>
+      </div>
+
+      {/* 下段: 詳細情報 */}
+      <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm border-t border-gray-100 pt-2">
+        <div className="flex items-center gap-2">
+          <span className="text-gray-400 text-xs w-16">IP</span>
+          <span className="text-gray-700 font-mono text-xs">{primaryAddress}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-gray-400 text-xs w-16">ポート</span>
+          <span className="text-gray-700 font-mono text-xs">{device.port}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-gray-400 text-xs w-16">バージョン</span>
+          <span className="text-gray-700 text-xs">{version}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-gray-400 text-xs w-16">UUID</span>
+          <span className="text-gray-500 font-mono text-xs truncate">{uuid}</span>
+        </div>
       </div>
     </div>
   );

@@ -24,7 +24,10 @@ function Header({ isSearching, onRefresh }: HeaderProps) {
               />
             </svg>
           </div>
-          <h1 className="text-lg font-semibold text-gray-800">DigiCode Helper</h1>
+          <div>
+            <h1 className="text-lg font-semibold text-gray-800">DigiCode Helper</h1>
+            <p className="text-xs text-gray-500">書き込み先デバイスを選択してください</p>
+          </div>
         </div>
 
         <button
