@@ -147,7 +147,9 @@ async fn resolve_service(app_handle: AppHandle, state: Arc<MdnsState>, instance_
     #[cfg(any(target_os = "macos", target_os = "windows"))]
     let args = vec!["-L", &instance_name, SERVICE_TYPE, "local."];
     #[cfg(target_os = "linux")]
-    let args = vec!["-n", &format!("{}.{}.local", instance_name, SERVICE_TYPE)];
+    let linux_arg = format!("{}.{}.local", instance_name, SERVICE_TYPE);
+    #[cfg(target_os = "linux")]
+    let args = vec!["-n", linux_arg.as_str()];
 
     info!("Resolving: {} {:?}", cmd, args);
 
@@ -217,6 +219,14 @@ async fn resolve_service(app_handle: AppHandle, state: Arc<MdnsState>, instance_
 }
 
 /// dns-sd -G でIPアドレスを取得
+/// Linux では avahi-resolve で既にIPが取得されているため、この関数は何もしない
+#[cfg(target_os = "linux")]
+async fn resolve_ip(_app_handle: AppHandle, _state: Arc<MdnsState>, _instance_name: String) {
+    info!("IP resolution skipped on Linux (avahi-resolve already provides IP)");
+}
+
+/// dns-sd -G でIPアドレスを取得 (macOS/Windows)
+#[cfg(not(target_os = "linux"))]
 async fn resolve_ip(app_handle: AppHandle, state: Arc<MdnsState>, instance_name: String) {
     let hostname = format!("{}.local.", instance_name.replace("digicode-", "digicode-"));
 
@@ -225,41 +235,37 @@ async fn resolve_ip(app_handle: AppHandle, state: Arc<MdnsState>, instance_name:
     #[cfg(target_os = "windows")]
     let cmd = "dns-sd.exe";
 
-    #[cfg(any(target_os = "macos", target_os = "windows"))]
-    {
-        // dns-sd -G v4 <hostname> でIPv4アドレスを取得
-        // タイムアウト付きで実行
-        let args = vec!["-t", "2", "-G", "v4", &hostname];
+    // dns-sd -G v4 <hostname> でIPv4アドレスを取得
+    let args = vec!["-t", "2", "-G", "v4", &hostname];
 
-        let output = match tokio::time::timeout(
-            std::time::Duration::from_secs(5),
-            Command::new(cmd).args(&args).output()
-        ).await {
-            Ok(Ok(o)) => o,
-            Ok(Err(e)) => {
-                warn!("Failed to resolve IP for {}: {}", hostname, e);
-                return;
-            }
-            Err(_) => {
-                warn!("Timeout resolving IP for {}", hostname);
-                return;
-            }
-        };
+    let output = match tokio::time::timeout(
+        std::time::Duration::from_secs(5),
+        Command::new(cmd).args(&args).output()
+    ).await {
+        Ok(Ok(o)) => o,
+        Ok(Err(e)) => {
+            warn!("Failed to resolve IP for {}: {}", hostname, e);
+            return;
+        }
+        Err(_) => {
+            warn!("Timeout resolving IP for {}", hostname);
+            return;
+        }
+    };
 
-        let stdout = String::from_utf8_lossy(&output.stdout);
+    let stdout = String::from_utf8_lossy(&output.stdout);
 
-        // IPアドレスを抽出して更新
-        if let Some(ip) = extract_ip_from_output(&stdout) {
-            let full_name = format!("{}._digicode._tcp.local.", instance_name);
+    // IPアドレスを抽出して更新
+    if let Some(ip) = extract_ip_from_output(&stdout) {
+        let full_name = format!("{}._digicode._tcp.local.", instance_name);
 
-            if let Some(device) = state.devices.write().await.get_mut(&full_name) {
-                if !device.addresses.contains(&ip) {
-                    device.addresses.push(ip.clone());
-                    info!("Updated IP for {}: {}", instance_name, ip);
+        if let Some(device) = state.devices.write().await.get_mut(&full_name) {
+            if !device.addresses.contains(&ip) {
+                device.addresses.push(ip.clone());
+                info!("Updated IP for {}: {}", instance_name, ip);
 
-                    if let Err(e) = app_handle.emit("device-found", &device.clone()) {
-                        error!("Failed to emit device update: {}", e);
-                    }
+                if let Err(e) = app_handle.emit("device-found", &device.clone()) {
+                    error!("Failed to emit device update: {}", e);
                 }
             }
         }
