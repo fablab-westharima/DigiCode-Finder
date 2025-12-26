@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getVersion } from '@tauri-apps/api/app';
+import { writeText } from '@tauri-apps/plugin-clipboard-manager';
 import { useDevices } from './hooks/useDevices';
 import { useUpdater } from './hooks/useUpdater';
 import DeviceCard from './components/DeviceCard';
@@ -9,6 +10,27 @@ function App() {
   const { devices, isSearching, refresh } = useDevices();
   const { updateAvailable, newVersion, isDownloading, downloadAndInstall } = useUpdater();
   const [appVersion, setAppVersion] = useState('');
+  const [allCopied, setAllCopied] = useState(false);
+
+  // 全デバイス情報をクリップボードにコピー
+  const handleCopyAllDevices = async () => {
+    const deviceInfos = devices.map(device => ({
+      type: 'digicode-device',
+      name: device.txt?.name || device.name,
+      ip: device.addresses[0] || '',
+      port: device.port,
+      version: device.txt?.version || '',
+      uuid: device.txt?.uuid || '',
+    }));
+
+    try {
+      await writeText(JSON.stringify(deviceInfos));
+      setAllCopied(true);
+      setTimeout(() => setAllCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy all devices:', err);
+    }
+  };
 
   useEffect(() => {
     getVersion().then(setAppVersion).catch(() => setAppVersion('unknown'));
@@ -62,6 +84,33 @@ function App() {
           </div>
         ) : (
           <div className="space-y-3">
+            {/* 全デバイスコピーボタン（2台以上の場合のみ表示） */}
+            {devices.length >= 2 && (
+              <button
+                onClick={handleCopyAllDevices}
+                className={`w-full py-2 px-4 rounded-lg font-medium text-sm transition-all ${
+                  allCopied
+                    ? 'bg-green-500 text-white'
+                    : 'bg-blue-600 hover:bg-blue-700 text-white'
+                }`}
+              >
+                {allCopied ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    {devices.length}台のデバイス情報をコピーしました
+                  </span>
+                ) : (
+                  <span className="flex items-center justify-center gap-2">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    全デバイス情報をコピー（{devices.length}台）
+                  </span>
+                )}
+              </button>
+            )}
             {devices.map((device) => (
               <DeviceCard key={device.name} device={device} />
             ))}

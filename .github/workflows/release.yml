@@ -93,9 +93,8 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
-          tagName: v__VERSION__
-          releaseName: 'DigiCode Helper v__VERSION__'
-          releaseId: ${{ needs.create-release.outputs.release_id }}
+          # releaseIdを指定しないことで自動アップロードを無効化
+          # カスタムスクリプトでOS名入りのファイル名でアップロードする
           args: ${{ matrix.target && format('--target {0}', matrix.target) || '' }}
 
       - name: Get version
@@ -244,19 +243,68 @@ jobs:
         id: get_version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
 
-      - name: Download and upload latest.json
+      - name: Generate and upload latest.json
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           VERSION=${{ steps.get_version.outputs.VERSION }}
+          REPO="fablab-westharima/DigiCode-Helper"
+          BASE_URL="https://github.com/${REPO}/releases/download/v${VERSION}"
 
-          # Wait for artifacts to be available
+          # Wait for all artifacts to be available
           sleep 30
 
-          # Download existing latest.json if it exists
-          gh release download "v${VERSION}" -p "latest.json" -D /tmp || true
+          # Download signature files
+          mkdir -p /tmp/sigs
+          gh release download "v${VERSION}" -p "*.sig" -D /tmp/sigs || true
 
-          if [ -f "/tmp/latest.json" ]; then
-            echo "latest.json found, uploading..."
-            gh release upload "v${VERSION}" "/tmp/latest.json" --clobber || true
+          # Read signatures
+          DARWIN_X64_SIG=""
+          DARWIN_ARM_SIG=""
+          LINUX_SIG=""
+          WINDOWS_SIG=""
+
+          if [ -f "/tmp/sigs/DigiCode.Helper_macOS-Intel_${VERSION}.app.tar.gz.sig" ]; then
+            DARWIN_X64_SIG=$(cat "/tmp/sigs/DigiCode.Helper_macOS-Intel_${VERSION}.app.tar.gz.sig")
           fi
+          if [ -f "/tmp/sigs/DigiCode.Helper_macOS-ARM_${VERSION}.app.tar.gz.sig" ]; then
+            DARWIN_ARM_SIG=$(cat "/tmp/sigs/DigiCode.Helper_macOS-ARM_${VERSION}.app.tar.gz.sig")
+          fi
+          if [ -f "/tmp/sigs/DigiCode.Helper_Linux_${VERSION}.AppImage.sig" ]; then
+            LINUX_SIG=$(cat "/tmp/sigs/DigiCode.Helper_Linux_${VERSION}.AppImage.sig")
+          fi
+          if [ -f "/tmp/sigs/DigiCode.Helper_Windows_${VERSION}-setup.exe.sig" ]; then
+            WINDOWS_SIG=$(cat "/tmp/sigs/DigiCode.Helper_Windows_${VERSION}-setup.exe.sig")
+          fi
+
+          # Generate latest.json
+          cat > /tmp/latest.json << EOF
+          {
+            "version": "${VERSION}",
+            "notes": "DigiCode Helper v${VERSION}",
+            "pub_date": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "platforms": {
+              "darwin-x86_64": {
+                "url": "${BASE_URL}/DigiCode.Helper_macOS-Intel_${VERSION}.app.tar.gz",
+                "signature": "${DARWIN_X64_SIG}"
+              },
+              "darwin-aarch64": {
+                "url": "${BASE_URL}/DigiCode.Helper_macOS-ARM_${VERSION}.app.tar.gz",
+                "signature": "${DARWIN_ARM_SIG}"
+              },
+              "linux-x86_64": {
+                "url": "${BASE_URL}/DigiCode.Helper_Linux_${VERSION}.AppImage",
+                "signature": "${LINUX_SIG}"
+              },
+              "windows-x86_64": {
+                "url": "${BASE_URL}/DigiCode.Helper_Windows_${VERSION}-setup.exe",
+                "signature": "${WINDOWS_SIG}"
+              }
+            }
+          }
+          EOF
+
+          echo "Generated latest.json:"
+          cat /tmp/latest.json
+
+          gh release upload "v${VERSION}" "/tmp/latest.json" --clobber
