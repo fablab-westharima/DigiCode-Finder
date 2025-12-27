@@ -57,7 +57,7 @@ pub fn run() {
             });
 
             // 起動時の自動検索は行わない（ユーザーが更新ボタンを押した時のみ検索）
-            info!("DigiCode Helper started (press refresh to search for devices)");
+            info!("DigiCode Finder started (press refresh to search for devices)");
             Ok(())
         })
         .run(tauri::generate_context!())

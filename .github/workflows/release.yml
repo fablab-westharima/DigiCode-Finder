@@ -25,15 +25,15 @@ jobs:
         id: create-release
         uses: softprops/action-gh-release@v2
         with:
-          name: 'DigiCode Helper v${{ steps.get_version.outputs.VERSION }}'
+          name: 'DigiCode Finder v${{ steps.get_version.outputs.VERSION }}'
           body: |
-            DigiCode Helper の新しいバージョンがリリースされました。
+            DigiCode Finder の新しいバージョンがリリースされました。
 
             ## ダウンロード
-            - **macOS (Intel)**: `DigiCode.Helper_macOS-Intel_*.dmg`
-            - **macOS (Apple Silicon)**: `DigiCode.Helper_macOS-ARM_*.dmg`
-            - **Windows**: `DigiCode.Helper_Windows_*.exe`
-            - **Linux**: `DigiCode.Helper_Linux_*.AppImage`
+            - **macOS (Intel)**: `DigiCode.Finder_macOS-Intel_*.dmg`
+            - **macOS (Apple Silicon)**: `DigiCode.Finder_macOS-ARM_*.dmg`
+            - **Windows**: `DigiCode.Finder_Windows_*.exe`
+            - **Linux**: `DigiCode.Finder_Linux_*.AppImage`
 
             ## 自動更新
             アプリ内で自動的に更新通知が表示されます。
@@ -114,7 +114,7 @@ jobs:
           # Find and rename DMG files
           for file in src-tauri/target/*/release/bundle/dmg/*.dmg; do
             if [ -f "$file" ]; then
-              newname="DigiCode.Helper_${OS_NAME}_${VERSION}.dmg"
+              newname="DigiCode.Finder_${OS_NAME}_${VERSION}.dmg"
               cp "$file" "/tmp/upload/${newname}"
               echo "Uploading ${newname}"
               gh release upload "v${VERSION}" "/tmp/upload/${newname}" --clobber || true
@@ -124,7 +124,7 @@ jobs:
           # Find and rename tar.gz files (for updater)
           for file in src-tauri/target/*/release/bundle/macos/*.tar.gz; do
             if [ -f "$file" ]; then
-              newname="DigiCode.Helper_${OS_NAME}_${VERSION}.app.tar.gz"
+              newname="DigiCode.Finder_${OS_NAME}_${VERSION}.app.tar.gz"
               cp "$file" "/tmp/upload/${newname}"
               echo "Uploading ${newname}"
               gh release upload "v${VERSION}" "/tmp/upload/${newname}" --clobber || true
@@ -134,7 +134,7 @@ jobs:
           # Upload sig files for updater
           for file in src-tauri/target/*/release/bundle/macos/*.tar.gz.sig; do
             if [ -f "$file" ]; then
-              newname="DigiCode.Helper_${OS_NAME}_${VERSION}.app.tar.gz.sig"
+              newname="DigiCode.Finder_${OS_NAME}_${VERSION}.app.tar.gz.sig"
               cp "$file" "/tmp/upload/${newname}"
               echo "Uploading ${newname}"
               gh release upload "v${VERSION}" "/tmp/upload/${newname}" --clobber || true
@@ -154,7 +154,7 @@ jobs:
           # Find and upload exe files
           for file in src-tauri/target/release/bundle/nsis/*.exe; do
             if [ -f "$file" ]; then
-              newname="DigiCode.Helper_${OS_NAME}_${VERSION}-setup.exe"
+              newname="DigiCode.Finder_${OS_NAME}_${VERSION}-setup.exe"
               cp "$file" "/tmp/upload/${newname}"
               echo "Uploading ${newname}"
               gh release upload "v${VERSION}" "/tmp/upload/${newname}" --clobber || true
@@ -164,7 +164,7 @@ jobs:
           # Find and upload nsis sig for updater
           for file in src-tauri/target/release/bundle/nsis/*.exe.sig; do
             if [ -f "$file" ]; then
-              newname="DigiCode.Helper_${OS_NAME}_${VERSION}-setup.exe.sig"
+              newname="DigiCode.Finder_${OS_NAME}_${VERSION}-setup.exe.sig"
               cp "$file" "/tmp/upload/${newname}"
               echo "Uploading ${newname}"
               gh release upload "v${VERSION}" "/tmp/upload/${newname}" --clobber || true
@@ -174,7 +174,7 @@ jobs:
           # Find and upload msi files
           for file in src-tauri/target/release/bundle/msi/*.msi; do
             if [ -f "$file" ]; then
-              newname="DigiCode.Helper_${OS_NAME}_${VERSION}.msi"
+              newname="DigiCode.Finder_${OS_NAME}_${VERSION}.msi"
               cp "$file" "/tmp/upload/${newname}"
               echo "Uploading ${newname}"
               gh release upload "v${VERSION}" "/tmp/upload/${newname}" --clobber || true
@@ -193,7 +193,7 @@ jobs:
           # Find and upload AppImage
           for file in src-tauri/target/release/bundle/appimage/*.AppImage; do
             if [ -f "$file" ]; then
-              newname="DigiCode.Helper_${OS_NAME}_${VERSION}.AppImage"
+              newname="DigiCode.Finder_${OS_NAME}_${VERSION}.AppImage"
               cp "$file" "/tmp/upload/${newname}"
               echo "Uploading ${newname}"
               gh release upload "v${VERSION}" "/tmp/upload/${newname}" --clobber || true
@@ -203,7 +203,7 @@ jobs:
           # Find and upload AppImage sig for updater
           for file in src-tauri/target/release/bundle/appimage/*.AppImage.sig; do
             if [ -f "$file" ]; then
-              newname="DigiCode.Helper_${OS_NAME}_${VERSION}.AppImage.sig"
+              newname="DigiCode.Finder_${OS_NAME}_${VERSION}.AppImage.sig"
               cp "$file" "/tmp/upload/${newname}"
               echo "Uploading ${newname}"
               gh release upload "v${VERSION}" "/tmp/upload/${newname}" --clobber || true
@@ -213,7 +213,7 @@ jobs:
           # Find and upload deb
           for file in src-tauri/target/release/bundle/deb/*.deb; do
             if [ -f "$file" ]; then
-              newname="DigiCode.Helper_${OS_NAME}_${VERSION}.deb"
+              newname="DigiCode.Finder_${OS_NAME}_${VERSION}.deb"
               cp "$file" "/tmp/upload/${newname}"
               echo "Uploading ${newname}"
               gh release upload "v${VERSION}" "/tmp/upload/${newname}" --clobber || true
@@ -223,7 +223,7 @@ jobs:
           # Find and upload rpm
           for file in src-tauri/target/release/bundle/rpm/*.rpm; do
             if [ -f "$file" ]; then
-              newname="DigiCode.Helper_${OS_NAME}_${VERSION}.rpm"
+              newname="DigiCode.Finder_${OS_NAME}_${VERSION}.rpm"
               cp "$file" "/tmp/upload/${newname}"
               echo "Uploading ${newname}"
               gh release upload "v${VERSION}" "/tmp/upload/${newname}" --clobber || true
@@ -264,17 +264,17 @@ jobs:
           LINUX_SIG=""
           WINDOWS_SIG=""
 
-          if [ -f "/tmp/sigs/DigiCode.Helper_macOS-Intel_${VERSION}.app.tar.gz.sig" ]; then
-            DARWIN_X64_SIG=$(cat "/tmp/sigs/DigiCode.Helper_macOS-Intel_${VERSION}.app.tar.gz.sig")
+          if [ -f "/tmp/sigs/DigiCode.Finder_macOS-Intel_${VERSION}.app.tar.gz.sig" ]; then
+            DARWIN_X64_SIG=$(cat "/tmp/sigs/DigiCode.Finder_macOS-Intel_${VERSION}.app.tar.gz.sig")
           fi
-          if [ -f "/tmp/sigs/DigiCode.Helper_macOS-ARM_${VERSION}.app.tar.gz.sig" ]; then
-            DARWIN_ARM_SIG=$(cat "/tmp/sigs/DigiCode.Helper_macOS-ARM_${VERSION}.app.tar.gz.sig")
+          if [ -f "/tmp/sigs/DigiCode.Finder_macOS-ARM_${VERSION}.app.tar.gz.sig" ]; then
+            DARWIN_ARM_SIG=$(cat "/tmp/sigs/DigiCode.Finder_macOS-ARM_${VERSION}.app.tar.gz.sig")
           fi
-          if [ -f "/tmp/sigs/DigiCode.Helper_Linux_${VERSION}.AppImage.sig" ]; then
-            LINUX_SIG=$(cat "/tmp/sigs/DigiCode.Helper_Linux_${VERSION}.AppImage.sig")
+          if [ -f "/tmp/sigs/DigiCode.Finder_Linux_${VERSION}.AppImage.sig" ]; then
+            LINUX_SIG=$(cat "/tmp/sigs/DigiCode.Finder_Linux_${VERSION}.AppImage.sig")
           fi
-          if [ -f "/tmp/sigs/DigiCode.Helper_Windows_${VERSION}-setup.exe.sig" ]; then
-            WINDOWS_SIG=$(cat "/tmp/sigs/DigiCode.Helper_Windows_${VERSION}-setup.exe.sig")
+          if [ -f "/tmp/sigs/DigiCode.Finder_Windows_${VERSION}-setup.exe.sig" ]; then
+            WINDOWS_SIG=$(cat "/tmp/sigs/DigiCode.Finder_Windows_${VERSION}-setup.exe.sig")
           fi
 
           # Generate latest.json
@@ -285,19 +285,19 @@ jobs:
             "pub_date": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
             "platforms": {
               "darwin-x86_64": {
-                "url": "${BASE_URL}/DigiCode.Helper_macOS-Intel_${VERSION}.app.tar.gz",
+                "url": "${BASE_URL}/DigiCode.Finder_macOS-Intel_${VERSION}.app.tar.gz",
                 "signature": "${DARWIN_X64_SIG}"
               },
               "darwin-aarch64": {
-                "url": "${BASE_URL}/DigiCode.Helper_macOS-ARM_${VERSION}.app.tar.gz",
+                "url": "${BASE_URL}/DigiCode.Finder_macOS-ARM_${VERSION}.app.tar.gz",
                 "signature": "${DARWIN_ARM_SIG}"
               },
               "linux-x86_64": {
-                "url": "${BASE_URL}/DigiCode.Helper_Linux_${VERSION}.AppImage",
+                "url": "${BASE_URL}/DigiCode.Finder_Linux_${VERSION}.AppImage",
                 "signature": "${LINUX_SIG}"
               },
               "windows-x86_64": {
-                "url": "${BASE_URL}/DigiCode.Helper_Windows_${VERSION}-setup.exe",
+                "url": "${BASE_URL}/DigiCode.Finder_Windows_${VERSION}-setup.exe",
                 "signature": "${WINDOWS_SIG}"
               }
             }

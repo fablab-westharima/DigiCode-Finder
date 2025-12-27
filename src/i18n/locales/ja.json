@@ -1,11 +1,11 @@
 {
   "app": {
-    "title": "DigiCode Helper",
+    "title": "DigiCode Finder",
     "subtitle": "書き込み先デバイスを選択してください",
     "refresh": "更新",
     "deviceCount": "{{count}}台のデバイス",
     "searching": "検索中",
-    "version": "DigiCode Helper v{{version}}"
+    "version": "DigiCode Finder v{{version}}"
   },
   "device": {
     "online": "オンライン",

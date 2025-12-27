@@ -1,7 +1,7 @@
 {
-  "name": "digicode-helper",
-  "version": "1.0.0",
-  "description": "DigiCode Helper - mDNS device discovery for DigiCode",
+  "name": "digicode-finder",
+  "version": "1.3.0",
+  "description": "DigiCode Finder - mDNS device discovery for DigiCode",
   "type": "module",
   "scripts": {
     "dev": "vite",
