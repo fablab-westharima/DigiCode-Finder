@@ -5,7 +5,11 @@
     "refresh": "Refresh",
     "deviceCount": "{{count}} device(s)",
     "searching": "Searching",
-    "version": "DigiCode Finder v{{version}}"
+    "version": "v{{version}}"
+  },
+  "language": {
+    "ja": "日本語",
+    "en": "English"
   },
   "device": {
     "online": "Online",

@@ -1,8 +1,8 @@
 #!/bin/bash
 # latest.json を手動で作成するスクリプト
 
-VERSION="1.3.0"
-REPO="fablab-westharima/DigiCode-Helper"
+VERSION="1.4.0"
+REPO="fablab-westharima/DigiCode-Finder"
 BASE_URL="https://github.com/${REPO}/releases/download/v${VERSION}"
 
 # 一時ディレクトリ

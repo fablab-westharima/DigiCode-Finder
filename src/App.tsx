@@ -6,13 +6,15 @@ import { useDevices } from './hooks/useDevices';
 import { useUpdater } from './hooks/useUpdater';
 import DeviceCard from './components/DeviceCard';
 import Header from './components/Header';
+import './i18n';
 
 function App() {
-  const { t } = useTranslation();
+  const { t, i18n: i18nInstance } = useTranslation();
   const { devices, isSearching, refresh } = useDevices();
   const { updateAvailable, newVersion, isDownloading, downloadAndInstall } = useUpdater();
   const [appVersion, setAppVersion] = useState('');
   const [allCopied, setAllCopied] = useState(false);
+  const currentLang = i18nInstance.language?.startsWith('ja') ? 'ja' : 'en';
 
   const handleCopyAllDevices = async () => {
     const deviceInfos = devices.map(device => ({
@@ -135,7 +137,24 @@ function App() {
               </span>
             )}
           </span>
-          <span>{t('app.version', { version: appVersion })}</span>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center text-[11px]">
+              <button
+                onClick={() => i18nInstance.changeLanguage('ja')}
+                className={`px-1 ${currentLang === 'ja' ? 'text-blue-600 font-medium' : 'hover:text-gray-600'}`}
+              >
+                日本語
+              </button>
+              <span className="text-gray-300">|</span>
+              <button
+                onClick={() => i18nInstance.changeLanguage('en')}
+                className={`px-1 ${currentLang === 'en' ? 'text-blue-600 font-medium' : 'hover:text-gray-600'}`}
+              >
+                EN
+              </button>
+            </div>
+            <span>{t('app.version', { version: appVersion })}</span>
+          </div>
         </div>
       </footer>
     </div>
