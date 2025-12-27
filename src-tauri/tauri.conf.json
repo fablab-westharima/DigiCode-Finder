@@ -1,12 +1,12 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "DigiCode Finder",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "identifier": "jp.digital-fab.digicode-finder",
   "plugins": {
     "updater": {
       "endpoints": [
-        "https://github.com/fablab-westharima/DigiCode-Helper/releases/latest/download/latest.json"
+        "https://github.com/fablab-westharima/DigiCode-Finder/releases/latest/download/latest.json"
       ],
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDlBQjJGMjhFMDcwQjU0NUIKUldSYlZBc0hqdkt5bXN5bGt3UTZ3dGxRTUVJbFdnTXZwNktqSjl6dmlDSE81K2hISzl1RmxUMFoK"
     },

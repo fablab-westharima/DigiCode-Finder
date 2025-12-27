@@ -248,7 +248,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           VERSION=${{ steps.get_version.outputs.VERSION }}
-          REPO="fablab-westharima/DigiCode-Helper"
+          REPO="fablab-westharima/DigiCode-Finder"
           BASE_URL="https://github.com/${REPO}/releases/download/v${VERSION}"
 
           # Wait for all artifacts to be available
