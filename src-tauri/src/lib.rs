@@ -6,12 +6,28 @@ mod types;
 use log::info;
 use mdns_service::MdnsState;
 use std::sync::Arc;
+use tauri::AppHandle;
+use tokio::sync::RwLock;
+
+/// アプリケーション全体の状態
+pub struct AppState {
+    pub mdns: Arc<MdnsState>,
+    pub app_handle: Arc<RwLock<Option<AppHandle>>>,
+}
+
+impl AppState {
+    pub fn new() -> Self {
+        Self {
+            mdns: Arc::new(MdnsState::new()),
+            app_handle: Arc::new(RwLock::new(None)),
+        }
+    }
+}
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let state = Arc::new(MdnsState::new());
+    let state = Arc::new(AppState::new());
     let state_for_api = state.clone();
-    let state_for_mdns = state.clone();
 
     tauri::Builder::default()
         .plugin(tauri_plugin_log::Builder::default().build())
@@ -27,22 +43,21 @@ pub fn run() {
         .setup(move |app| {
             let app_handle = app.handle().clone();
 
+            // AppHandle を保存
+            let state_clone = state_for_api.clone();
+            tauri::async_runtime::spawn(async move {
+                *state_clone.app_handle.write().await = Some(app_handle.clone());
+            });
+
             // HTTP API サーバーを起動（別スレッド）
-            let state_api = state_for_api.clone();
+            let state_api = state_for_api.mdns.clone();
             std::thread::spawn(move || {
                 let rt = tokio::runtime::Runtime::new().unwrap();
                 rt.block_on(api_server::start_api_server(state_api));
             });
 
-            // mDNS 検索を開始（別スレッド）
-            std::thread::spawn(move || {
-                let rt = tokio::runtime::Runtime::new().unwrap();
-                rt.block_on(async move {
-                    mdns_service::start_mdns_search(app_handle, state_for_mdns).await;
-                });
-            });
-
-            info!("DigiCode Helper started");
+            // 起動時の自動検索は行わない（ユーザーが更新ボタンを押した時のみ検索）
+            info!("DigiCode Helper started (press refresh to search for devices)");
             Ok(())
         })
         .run(tauri::generate_context!())

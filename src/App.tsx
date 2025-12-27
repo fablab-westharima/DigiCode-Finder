@@ -76,9 +76,15 @@ function App() {
                   />
                 </svg>
                 <p className="text-lg font-medium mb-2">デバイスが見つかりません</p>
-                <p className="text-sm text-gray-400">
-                  ネットワークに接続された DigiCode デバイスを探しています
+                <p className="text-sm text-gray-400 mb-4">
+                  右上の「更新」ボタンでデバイスを検索
                 </p>
+                <button
+                  onClick={refresh}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+                >
+                  デバイスを検索
+                </button>
               </>
             )}
           </div>
