@@ -8,6 +8,9 @@ import DeviceCard from './components/DeviceCard';
 import Header from './components/Header';
 import './i18n';
 
+// Windowsかどうかを判定
+const isWindows = navigator.platform.toLowerCase().includes('win');
+
 function App() {
   const { t, i18n: i18nInstance } = useTranslation();
   const { devices, isSearching, refresh } = useDevices();
@@ -88,6 +91,22 @@ function App() {
                 >
                   {t('search.startSearch')}
                 </button>
+                {isWindows && (
+                  <div className="mt-6 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm">
+                    <p className="text-amber-800 mb-2">{t('search.windowsHint')}</p>
+                    <a
+                      href="https://support.apple.com/kb/DL999"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-amber-600 hover:text-amber-700 font-medium"
+                    >
+                      {t('search.installBonjour')}
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                    </a>
+                  </div>
+                )}
               </>
             )}
           </div>

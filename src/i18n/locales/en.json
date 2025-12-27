@@ -24,7 +24,9 @@
     "searching": "Searching for devices...",
     "noDevices": "No devices found",
     "hint": "Click \"Refresh\" to search for devices",
-    "startSearch": "Search Devices"
+    "startSearch": "Search Devices",
+    "windowsHint": "Windows requires Bonjour to be installed",
+    "installBonjour": "Install Bonjour"
   },
   "batch": {
     "selectAll": "Select all {{count}} devices",

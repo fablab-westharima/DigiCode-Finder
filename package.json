@@ -1,6 +1,6 @@
 {
   "name": "digicode-finder",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "DigiCode Finder - mDNS device discovery for DigiCode",
   "type": "module",
   "scripts": {

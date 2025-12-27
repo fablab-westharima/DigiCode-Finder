@@ -24,7 +24,9 @@
     "searching": "デバイスを検索中...",
     "noDevices": "デバイスが見つかりません",
     "hint": "右上の「更新」ボタンでデバイスを検索",
-    "startSearch": "デバイスを検索"
+    "startSearch": "デバイスを検索",
+    "windowsHint": "Windowsでは Bonjour のインストールが必要です",
+    "installBonjour": "Bonjourをインストール"
   },
   "batch": {
     "selectAll": "全{{count}}台を一括選択",

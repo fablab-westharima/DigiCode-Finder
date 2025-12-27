@@ -1,6 +1,6 @@
 [package]
 name = "digicode-finder"
-version = "1.4.0"
+version = "1.4.1"
 description = "DigiCode Finder - mDNS device discovery"
 authors = ["Fab Lab West Harima"]
 license = "MIT"
@@ -45,3 +45,6 @@ log = "0.4"
 
 # Date/Time
 chrono = { version = "0.4", features = ["serde"] }
+
+# URL opener
+open = "5"

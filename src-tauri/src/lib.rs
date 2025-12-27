@@ -7,7 +7,7 @@ use log::info;
 use mdns_service::MdnsState;
 use std::sync::Arc;
 use tauri::AppHandle;
-use tauri::menu::{Menu, PredefinedMenuItem, Submenu};
+use tauri::menu::{Menu, MenuItem, PredefinedMenuItem, Submenu};
 use tokio::sync::RwLock;
 
 /// アプリケーション全体の状態
@@ -76,9 +76,48 @@ pub fn run() {
                 ],
             )?;
 
+            // ヘルプメニュー
+            let bonjour_item = MenuItem::with_id(
+                handle,
+                "install_bonjour",
+                "Install Bonjour (Windows)",
+                true,
+                None::<&str>,
+            )?;
+            let github_item = MenuItem::with_id(
+                handle,
+                "open_github",
+                "GitHub Repository",
+                true,
+                None::<&str>,
+            )?;
+            let help_menu = Submenu::with_items(
+                handle,
+                "Help",
+                true,
+                &[
+                    &bonjour_item,
+                    &PredefinedMenuItem::separator(handle)?,
+                    &github_item,
+                ],
+            )?;
+
             // メニュー全体を構築
-            let menu = Menu::with_items(handle, &[&app_menu, &window_menu])?;
+            let menu = Menu::with_items(handle, &[&app_menu, &window_menu, &help_menu])?;
             app.set_menu(menu)?;
+
+            // メニューイベントハンドラ
+            app.on_menu_event(move |_app_handle, event| {
+                match event.id().as_ref() {
+                    "install_bonjour" => {
+                        let _ = open::that("https://support.apple.com/kb/DL999");
+                    }
+                    "open_github" => {
+                        let _ = open::that("https://github.com/fablab-westharima/DigiCode-Finder");
+                    }
+                    _ => {}
+                }
+            });
             let app_handle = app.handle().clone();
 
             // AppHandle を保存
