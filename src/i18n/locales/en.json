@@ -1,0 +1,34 @@
+{
+  "app": {
+    "title": "DigiCode Helper",
+    "subtitle": "Select a device to flash",
+    "refresh": "Refresh",
+    "deviceCount": "{{count}} device(s)",
+    "searching": "Searching",
+    "version": "DigiCode Helper v{{version}}"
+  },
+  "device": {
+    "online": "Online",
+    "select": "Select",
+    "selected": "Selected",
+    "ip": "IP",
+    "port": "Port",
+    "firmware": "Version",
+    "uuid": "UUID"
+  },
+  "search": {
+    "searching": "Searching for devices...",
+    "noDevices": "No devices found",
+    "hint": "Click \"Refresh\" to search for devices",
+    "startSearch": "Search Devices"
+  },
+  "batch": {
+    "selectAll": "Select all {{count}} devices",
+    "selected": "{{count}} device(s) selected"
+  },
+  "update": {
+    "available": "Version {{version}} is available",
+    "updating": "Updating...",
+    "updateNow": "Update Now"
+  }
+}

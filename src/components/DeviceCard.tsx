@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { writeText } from '@tauri-apps/plugin-clipboard-manager';
 import { DigiCodeDevice } from '../types';
 
@@ -7,9 +8,9 @@ interface DeviceCardProps {
 }
 
 function DeviceCard({ device }: DeviceCardProps) {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
 
-  // デバイス情報をクリップボードにコピー
   const handleCopyDeviceInfo = async () => {
     const deviceInfo = {
       type: 'digicode-device',
@@ -36,9 +37,7 @@ function DeviceCard({ device }: DeviceCardProps) {
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-3 hover:shadow-md hover:border-purple-300 transition-all">
-      {/* 上段: デバイス名・ステータス・選択ボタン */}
       <div className="flex items-center gap-3 mb-2">
-        {/* デバイスアイコン */}
         <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-emerald-500 rounded-lg flex items-center justify-center flex-shrink-0">
           <svg
             className="w-5 h-5 text-white"
@@ -55,18 +54,16 @@ function DeviceCard({ device }: DeviceCardProps) {
           </svg>
         </div>
 
-        {/* デバイス名・ステータス */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <h3 className="font-bold text-gray-800 truncate">{displayName}</h3>
             <span className="flex items-center gap-1 text-xs text-green-600 flex-shrink-0">
               <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse-dot" />
-              オンライン
+              {t('device.online')}
             </span>
           </div>
         </div>
 
-        {/* 選択ボタン */}
         <button
           onClick={handleCopyDeviceInfo}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex-shrink-0 ${
@@ -80,35 +77,34 @@ function DeviceCard({ device }: DeviceCardProps) {
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
-              選択済み
+              {t('device.selected')}
             </span>
           ) : (
             <span className="flex items-center gap-1.5">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
-              選択
+              {t('device.select')}
             </span>
           )}
         </button>
       </div>
 
-      {/* 下段: 詳細情報 */}
       <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm border-t border-gray-100 pt-2">
         <div className="flex items-center gap-2">
-          <span className="text-gray-400 text-xs w-16">IP</span>
+          <span className="text-gray-400 text-xs w-16">{t('device.ip')}</span>
           <span className="text-gray-700 font-mono text-xs">{primaryAddress}</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-gray-400 text-xs w-16">ポート</span>
+          <span className="text-gray-400 text-xs w-16">{t('device.port')}</span>
           <span className="text-gray-700 font-mono text-xs">{device.port}</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-gray-400 text-xs w-16">バージョン</span>
+          <span className="text-gray-400 text-xs w-16">{t('device.firmware')}</span>
           <span className="text-gray-700 text-xs">{version}</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-gray-400 text-xs w-16">UUID</span>
+          <span className="text-gray-400 text-xs w-16">{t('device.uuid')}</span>
           <span className="text-gray-500 font-mono text-xs truncate">{uuid}</span>
         </div>
       </div>

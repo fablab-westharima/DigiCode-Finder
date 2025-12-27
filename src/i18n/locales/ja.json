@@ -1,0 +1,34 @@
+{
+  "app": {
+    "title": "DigiCode Helper",
+    "subtitle": "書き込み先デバイスを選択してください",
+    "refresh": "更新",
+    "deviceCount": "{{count}}台のデバイス",
+    "searching": "検索中",
+    "version": "DigiCode Helper v{{version}}"
+  },
+  "device": {
+    "online": "オンライン",
+    "select": "選択",
+    "selected": "選択済み",
+    "ip": "IP",
+    "port": "ポート",
+    "firmware": "バージョン",
+    "uuid": "UUID"
+  },
+  "search": {
+    "searching": "デバイスを検索中...",
+    "noDevices": "デバイスが見つかりません",
+    "hint": "右上の「更新」ボタンでデバイスを検索",
+    "startSearch": "デバイスを検索"
+  },
+  "batch": {
+    "selectAll": "全{{count}}台を一括選択",
+    "selected": "{{count}}台を選択しました"
+  },
+  "update": {
+    "available": "新しいバージョン {{version}} が利用可能です",
+    "updating": "更新中...",
+    "updateNow": "今すぐ更新"
+  }
+}
