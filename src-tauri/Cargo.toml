@@ -1,6 +1,6 @@
 [package]
 name = "digicode-finder"
-version = "1.5.0"
+version = "1.5.1"
 description = "DigiCode Finder - mDNS device discovery"
 authors = ["Fab Lab West Harima"]
 license = "MIT"

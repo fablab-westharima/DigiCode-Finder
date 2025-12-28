@@ -14,7 +14,7 @@ use tokio::sync::RwLock;
 const SERVICE_TYPE: &str = "_digicode._tcp";
 
 /// 検索タイムアウト（秒）
-const SEARCH_TIMEOUT_SECS: u64 = 60;
+const SEARCH_TIMEOUT_SECS: u64 = 10;
 
 /// デバイス管理用の共有状態
 pub struct MdnsState {
