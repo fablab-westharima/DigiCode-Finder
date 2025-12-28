@@ -4,7 +4,7 @@ use log::{error, info, warn};
 use std::collections::HashMap;
 use std::process::Stdio;
 use std::sync::Arc;
-use std::time::Instant;
+use std::time::{Duration, Instant};
 use tauri::{AppHandle, Emitter};
 use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::process::{Child, Command};
@@ -14,7 +14,30 @@ use tokio::sync::RwLock;
 const SERVICE_TYPE: &str = "_digicode._tcp";
 
 /// 検索タイムアウト（秒）
-const SEARCH_TIMEOUT_SECS: u64 = 10;
+const SEARCH_TIMEOUT_SECS: u64 = 5;
+
+/// デバイスの到達性を確認（HTTP接続テスト）
+async fn check_device_reachable(ip: &str, port: u16) -> bool {
+    let url = format!("http://{}:{}/", ip, port);
+    let client = match reqwest::Client::builder()
+        .timeout(Duration::from_secs(2))
+        .build()
+    {
+        Ok(c) => c,
+        Err(_) => return false,
+    };
+
+    match client.get(&url).send().await {
+        Ok(_) => {
+            info!("Device {}:{} is reachable", ip, port);
+            true
+        }
+        Err(e) => {
+            info!("Device {}:{} is NOT reachable: {}", ip, port, e);
+            false
+        }
+    }
+}
 
 /// デバイス管理用の共有状態
 pub struct MdnsState {
@@ -219,15 +242,12 @@ async fn resolve_service(app_handle: AppHandle, state: Arc<MdnsState>, instance_
     if let Some(device) = parse_resolve_output(&instance_name, &output) {
         let full_name = device.name.clone();
 
+        // デバイス情報を一時保存（device-foundはIP解決とヘルスチェック後に送信）
         state.devices.write().await.insert(full_name.clone(), device.clone());
-
-        if let Err(e) = app_handle.emit("device-found", &device) {
-            error!("Failed to emit device-found: {}", e);
-        }
-
-        info!("Device resolved: {} at {}:{}", device.name, device.addresses.first().unwrap_or(&"unknown".to_string()), device.port);
+        info!("Device info stored: {} (pending verification)", full_name);
     }
 
+    // IP解決とヘルスチェックを実行（ここでdevice-foundまたはdevice-removedを送信）
     resolve_ip(app_handle, state, instance_name).await;
 }
 
@@ -263,20 +283,44 @@ async fn resolve_ip(app_handle: AppHandle, state: Arc<MdnsState>, instance_name:
     };
 
     let stdout = String::from_utf8_lossy(&output.stdout);
+    let full_name = format!("{}._digicode._tcp.local.", instance_name);
 
     if let Some(ip) = extract_ip_from_output(&stdout) {
-        let full_name = format!("{}._digicode._tcp.local.", instance_name);
+        // デバイスの到達性をチェック
+        let port = {
+            let devices = state.devices.read().await;
+            devices.get(&full_name).map(|d| d.port).unwrap_or(80)
+        };
 
-        if let Some(device) = state.devices.write().await.get_mut(&full_name) {
-            if !device.addresses.contains(&ip) {
-                device.addresses.push(ip.clone());
-                info!("Updated IP for {}: {}", instance_name, ip);
+        let is_reachable = check_device_reachable(&ip, port).await;
+
+        if is_reachable {
+            // 到達可能: デバイスを更新
+            let mut devices = state.devices.write().await;
+            if let Some(device) = devices.get_mut(&full_name) {
+                if !device.addresses.contains(&ip) {
+                    device.addresses.push(ip.clone());
+                }
+                device.is_online = true;
+                info!("Device {} is online at {}", instance_name, ip);
 
                 if let Err(e) = app_handle.emit("device-found", &device.clone()) {
                     error!("Failed to emit device update: {}", e);
                 }
             }
+        } else {
+            // 到達不能: デバイスを削除
+            info!("Device {} is offline (cached mDNS entry), removing", instance_name);
+            state.devices.write().await.remove(&full_name);
+
+            if let Err(e) = app_handle.emit("device-removed", &full_name) {
+                error!("Failed to emit device-removed: {}", e);
+            }
         }
+    } else {
+        // IPが解決できない場合もデバイスを削除
+        info!("Could not resolve IP for {}, removing", instance_name);
+        state.devices.write().await.remove(&full_name);
     }
 }
 
