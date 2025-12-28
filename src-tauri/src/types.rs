@@ -18,6 +18,13 @@ pub struct DigiCodeDevice {
     /// 最終検出時刻
     #[serde(rename = "lastSeen")]
     pub last_seen: DateTime<Utc>,
+    /// オンライン状態（到達性確認済み）
+    #[serde(rename = "isOnline", default = "default_online")]
+    pub is_online: bool,
+}
+
+fn default_online() -> bool {
+    true // デフォルトはオンライン（発見直後）
 }
 
 /// API レスポンス: デバイス一覧

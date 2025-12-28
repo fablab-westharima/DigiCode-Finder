@@ -772,12 +772,13 @@ dependencies = [
 
 [[package]]
 name = "digicode-finder"
-version = "1.4.0"
+version = "1.4.1"
 dependencies = [
  "axum",
  "chrono",
  "log",
  "open",
+ "reqwest",
  "serde",
  "serde_json",
  "tauri",

@@ -40,6 +40,8 @@ pub fn run() {
             commands::get_devices,
             commands::start_search,
             commands::get_status,
+            commands::verify_devices,
+            commands::check_device_online,
         ])
         .setup(move |app| {
             // カスタムメニューを作成（不要な項目を削除）

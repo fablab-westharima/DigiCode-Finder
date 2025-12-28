@@ -6,12 +6,14 @@ import { DigiCodeDevice } from '../types';
 interface UseDevicesReturn {
   devices: DigiCodeDevice[];
   isSearching: boolean;
+  isVerifying: boolean;
   refresh: () => Promise<void>;
 }
 
 export function useDevices(): UseDevicesReturn {
   const [devices, setDevices] = useState<DigiCodeDevice[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
 
   // デバイス一覧を取得
   const fetchDevices = useCallback(async () => {
@@ -35,9 +37,29 @@ export function useDevices(): UseDevicesReturn {
     }
   }, []);
 
-  // 検索をリフレッシュ
+  // 既存デバイスの到達性を検証
+  const verifyDevices = useCallback(async () => {
+    try {
+      setIsVerifying(true);
+      const removedCount = await invoke<number>('verify_devices');
+      console.log(`Verification complete: ${removedCount} offline devices removed`);
+      // 検証後にデバイス一覧を更新
+      await fetchDevices();
+    } catch (error) {
+      console.error('Failed to verify devices:', error);
+    } finally {
+      setIsVerifying(false);
+    }
+  }, [fetchDevices]);
+
+  // 検索をリフレッシュ（まず既存デバイスを検証、次に新規検索）
   const refresh = useCallback(async () => {
     try {
+      // 既存デバイスがある場合は先に検証
+      if (devices.length > 0) {
+        await verifyDevices();
+      }
+
       setIsSearching(true);
       setDevices([]);
       await invoke('start_search');
@@ -45,7 +67,7 @@ export function useDevices(): UseDevicesReturn {
       console.error('Failed to start search:', error);
       setIsSearching(false);
     }
-  }, []);
+  }, [devices.length, verifyDevices]);
 
   // 初期化とイベントリスナーのセットアップ
   useEffect(() => {
@@ -90,5 +112,5 @@ export function useDevices(): UseDevicesReturn {
     };
   }, [fetchDevices, fetchStatus]);
 
-  return { devices, isSearching, refresh };
+  return { devices, isSearching, isVerifying, refresh };
 }

@@ -320,6 +320,7 @@ fn parse_resolve_output(instance_name: &str, output: &str) -> Option<DigiCodeDev
         port,
         txt,
         last_seen: Utc::now(),
+        is_online: true, // 発見直後はオンラインとみなす
     })
 }
 

@@ -13,7 +13,7 @@ const isWindows = navigator.platform.toLowerCase().includes('win');
 
 function App() {
   const { t, i18n: i18nInstance } = useTranslation();
-  const { devices, isSearching, refresh } = useDevices();
+  const { devices, isSearching, isVerifying, refresh } = useDevices();
   const { updateAvailable, newVersion, isDownloading, downloadAndInstall } = useUpdater();
   const [appVersion, setAppVersion] = useState('');
   const [allCopied, setAllCopied] = useState(false);
@@ -149,7 +149,13 @@ function App() {
         <div className="flex items-center justify-between text-xs text-gray-400">
           <span>
             {t('app.deviceCount', { count: devices.length })}
-            {isSearching && (
+            {isVerifying && (
+              <span className="ml-2 inline-flex items-center">
+                <span className="w-1.5 h-1.5 bg-yellow-500 rounded-full animate-pulse-dot mr-1" />
+                {t('app.verifying', 'Verifying...')}
+              </span>
+            )}
+            {isSearching && !isVerifying && (
               <span className="ml-2 inline-flex items-center">
                 <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse-dot mr-1" />
                 {t('app.searching')}

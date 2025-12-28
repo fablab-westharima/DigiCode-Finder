@@ -5,6 +5,7 @@
     "refresh": "更新",
     "deviceCount": "{{count}}台のデバイス",
     "searching": "検索中",
+    "verifying": "確認中",
     "version": "v{{version}}"
   },
   "language": {

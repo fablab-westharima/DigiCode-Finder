@@ -5,6 +5,7 @@
     "refresh": "Refresh",
     "deviceCount": "{{count}} device(s)",
     "searching": "Searching",
+    "verifying": "Verifying",
     "version": "v{{version}}"
   },
   "language": {

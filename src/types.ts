@@ -11,6 +11,7 @@ export interface DigiCodeDevice {
     [key: string]: string | undefined;
   };
   lastSeen: Date;
+  isOnline?: boolean; // オンライン状態（到達性確認済み）
 }
 
 // API レスポンス
