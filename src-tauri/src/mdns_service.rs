@@ -14,13 +14,14 @@ use tokio::sync::RwLock;
 const SERVICE_TYPE: &str = "_digicode._tcp";
 
 /// 検索タイムアウト（秒）
-const SEARCH_TIMEOUT_SECS: u64 = 5;
+/// ESP32のHTTPサーバーが3-20秒かかる可能性があるため、余裕を持たせる
+const SEARCH_TIMEOUT_SECS: u64 = 15;
 
 /// デバイスの到達性を確認（HTTP接続テスト）
 async fn check_device_reachable(ip: &str, port: u16) -> bool {
     let url = format!("http://{}:{}/", ip, port);
     let client = match reqwest::Client::builder()
-        .timeout(Duration::from_secs(2))
+        .timeout(Duration::from_secs(30))
         .build()
     {
         Ok(c) => c,
