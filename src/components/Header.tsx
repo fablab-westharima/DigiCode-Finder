@@ -1,3 +1,11 @@
+/*
+ * DigiCode Finder - mDNS Device Detector
+ * Copyright (C) 2024-2026 DigiCo LLC
+ *
+ * Licensed under the GNU Affero General Public License version 3 or later.
+ * See LICENSE file in the repository root for full terms.
+ */
+
 import { useTranslation } from 'react-i18next';
 
 interface HeaderProps {

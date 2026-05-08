@@ -1,3 +1,11 @@
+/*
+ * DigiCode Finder - mDNS Device Detector
+ * Copyright (C) 2024-2026 DigiCo LLC
+ *
+ * Licensed under the GNU Affero General Public License version 3 or later.
+ * See LICENSE file in the repository root for full terms.
+ */
+
 use crate::mdns_service::{self, MdnsState};
 use crate::types::{DevicesResponse, HealthResponse, SearchRequest, SearchResponse, StatusResponse};
 use axum::{
