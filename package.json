@@ -16,7 +16,7 @@
     "esp32"
   ],
   "author": "Fab Lab West Harima",
-  "license": "MIT",
+  "license": "AGPL-3.0-or-later",
   "devDependencies": {
     "@tauri-apps/cli": "^2",
     "@types/node": "^20.10.0",
